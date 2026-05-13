@@ -52,7 +52,10 @@ export default function App() {
     setStep(`result-${response}`)
   }, [])
 
-  const handleFlowerField = useCallback(() => {
+  const [fieldStatus, setFieldStatus] = useState('suka')
+
+  const handleFlowerField = useCallback((status) => {
+    setFieldStatus(status)
     setStep('flower-field')
   }, [])
 
@@ -199,7 +202,7 @@ export default function App() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <FlowerField onRestart={handleRestart} />
+            <FlowerField onRestart={handleRestart} status={fieldStatus} />
           </motion.div>
         )}
 

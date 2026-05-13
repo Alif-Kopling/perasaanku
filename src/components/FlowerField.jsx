@@ -11,7 +11,7 @@ const COLORS = [
   { petal: '#fbbf24', center: '#fef9c3', stem: '#16a34a' },
 ]
 
-export default function FlowerField({ onRestart }) {
+export default function FlowerField({ onRestart, status = 'suka' }) {
   const canvasRef = useRef(null)
   const [showUI, setShowUI] = useState(false)
   const stateRef = useRef({
@@ -43,13 +43,14 @@ export default function FlowerField({ onRestart }) {
       canvas.style.height = h + 'px'
       ctx.scale(dpr, dpr)
 
+      const isGagal = status === 'gagal'
       bgGradient = ctx.createRadialGradient(w / 2, h * 0.5, 0, w / 2, h * 0.5, h * 0.8)
-      bgGradient.addColorStop(0, '#1e1b4b')
-      bgGradient.addColorStop(1, '#0f0d2e')
+      bgGradient.addColorStop(0, isGagal ? '#333' : '#1e1b4b')
+      bgGradient.addColorStop(1, isGagal ? '#111' : '#0f0d2e')
 
       groundGradient = ctx.createLinearGradient(0, h - 80, 0, h)
       groundGradient.addColorStop(0, 'transparent')
-      groundGradient.addColorStop(1, '#14532d')
+      groundGradient.addColorStop(1, isGagal ? '#262626' : '#14532d')
 
       const spacing = Math.max(60, Math.min(90, w / 14))
       const cols = Math.ceil(w / spacing) + 1
@@ -59,9 +60,11 @@ export default function FlowerField({ onRestart }) {
 
       for (let r = 0; r < rows; r++) {
         for (let c = 0; c < cols; c++) {
-          const color = COLORS[Math.floor(Math.random() * COLORS.length)]
+          const color = isGagal 
+            ? { petal: '#525252', center: '#262626', stem: '#404040' } 
+            : COLORS[Math.floor(Math.random() * COLORS.length)]
           const stemH = 60 + Math.random() * 90 + (1 - r / rows) * 50
-          const scale = 0.5 + Math.random() * 0.4
+          const scale = (isGagal ? 0.3 : 0.5) + Math.random() * 0.4
 
           flowers.push({
             x: offsetX + c * spacing + (Math.random() - 0.5) * spacing * 0.3,
@@ -75,8 +78,8 @@ export default function FlowerField({ onRestart }) {
             targetBendX: 0,
             targetBendY: 0,
             swayPhase: Math.random() * Math.PI * 2,
-            swaySpeed: 0.3 + Math.random() * 0.4,
-            swayAmp: 0.3 + Math.random() * 0.4,
+            swaySpeed: isGagal ? 0.1 : (0.3 + Math.random() * 0.4),
+            swayAmp: isGagal ? 0.05 : (0.3 + Math.random() * 0.4),
             z: (r / rows + Math.random() * 0.1),
           })
         }
@@ -125,18 +128,24 @@ export default function FlowerField({ onRestart }) {
       const heartX = w / 2
       const heartY = h * 0.42
       const heartSize = Math.min(w, h) * 0.22
-      const pulse = 1 + Math.sin(time * 0.8) * 0.02
+      const pulse = status === 'suka' ? 1 + Math.sin(time * 0.8) * 0.02 : 1
 
       ctx.save()
-      ctx.shadowColor = '#f472b6'
-      ctx.shadowBlur = 40 + Math.sin(time * 0.8) * 15
 
-      const heartGrad = ctx.createRadialGradient(heartX, heartY - heartSize * 0.15, 0, heartX, heartY, heartSize)
-      heartGrad.addColorStop(0, '#fbcfe8')
-      heartGrad.addColorStop(0.3, '#f472b6')
-      heartGrad.addColorStop(0.7, '#ec4899')
-      heartGrad.addColorStop(1, '#be185d')
-      ctx.fillStyle = heartGrad
+      if (status === 'suka') {
+        ctx.shadowColor = '#f472b6'
+        ctx.shadowBlur = 40 + Math.sin(time * 0.8) * 15
+        const heartGrad = ctx.createRadialGradient(heartX, heartY - heartSize * 0.15, 0, heartX, heartY, heartSize)
+        heartGrad.addColorStop(0, '#fbcfe8')
+        heartGrad.addColorStop(0.3, '#f472b6')
+        heartGrad.addColorStop(0.7, '#ec4899')
+        heartGrad.addColorStop(1, '#be185d')
+        ctx.fillStyle = heartGrad
+      } else if (status === 'pikir') {
+        ctx.fillStyle = '#94a3b8'
+      } else {
+        ctx.fillStyle = '#404040'
+      }
 
       ctx.beginPath()
       for (let t = 0; t <= Math.PI * 2; t += 0.04) {
@@ -149,33 +158,19 @@ export default function FlowerField({ onRestart }) {
       }
       ctx.closePath()
       ctx.fill()
-
-      ctx.shadowBlur = 0
-      ctx.strokeStyle = '#fbcfe8'
-      ctx.lineWidth = 2
-      ctx.stroke()
+      
+      if (status === 'gagal') {
+        ctx.strokeStyle = '#262626'
+        ctx.lineWidth = 3
+        ctx.beginPath()
+        ctx.moveTo(heartX, heartY - heartSize * 0.3)
+        ctx.lineTo(heartX + heartSize * 0.2, heartY + heartSize * 0.1)
+        ctx.moveTo(heartX - heartSize * 0.1, heartY + heartSize * 0.2)
+        ctx.lineTo(heartX + heartSize * 0.1, heartY + heartSize * 0.4)
+        ctx.stroke()
+      }
 
       ctx.restore()
-
-      const pedX = heartX
-      const pedY = heartY + heartSize * 0.65
-      const pedW = heartSize * 0.3
-      const pedH = heartSize * 0.08
-
-      const pedGrad = ctx.createLinearGradient(pedX - pedW, pedY, pedX + pedW, pedY)
-      pedGrad.addColorStop(0, '#475569')
-      pedGrad.addColorStop(0.3, '#94a3b8')
-      pedGrad.addColorStop(0.7, '#94a3b8')
-      pedGrad.addColorStop(1, '#475569')
-      ctx.fillStyle = pedGrad
-      ctx.beginPath()
-      ctx.ellipse(pedX, pedY, pedW, pedH, 0, 0, Math.PI * 2)
-      ctx.fill()
-
-      ctx.fillStyle = '#334155'
-      ctx.beginPath()
-      ctx.ellipse(pedX, pedY + pedH * 0.5, pedW * 0.8, pedH * 1.2, 0, 0, Math.PI * 2)
-      ctx.fill()
 
       for (let i = 0; i < flowers.length; i++) {
         const f = flowers[i]
@@ -187,7 +182,7 @@ export default function FlowerField({ onRestart }) {
         const dx = mouseX - f.x
         const dy = mouseY - (f.baseY - f.stemH * f.scale * 0.5)
         const dist = Math.sqrt(dx * dx + dy * dy)
-        const threshold = 120
+        const threshold = status === 'gagal' ? 50 : 120
 
         if (dist < threshold) {
           const strength = (1 - dist / threshold) * 40
@@ -253,7 +248,7 @@ export default function FlowerField({ onRestart }) {
       window.removeEventListener('touchstart', handleTouch)
       window.removeEventListener('mouseleave', handleLeave)
     }
-  }, [])
+  }, [status])
 
   return (
     <div className="relative w-full h-screen overflow-hidden bg-[#0f0d2e]">
@@ -266,15 +261,35 @@ export default function FlowerField({ onRestart }) {
           transition={{ duration: 1 }}
           className="fixed inset-0 flex flex-col items-center justify-end pb-16 pointer-events-none"
         >
-          <div className="pointer-events-auto">
-            <motion.p
+          <div className="pointer-events-auto flex flex-col items-center gap-4">
+            {status !== 'gagal' && (
+              <motion.p
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5, duration: 0.8 }}
+                className="text-white/40 text-sm font-sans text-center mb-4"
+              >
+                gerakkan kursor ke ladang bunga ✦
+              </motion.p>
+            )}
+
+            <motion.a
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5, duration: 0.8 }}
-              className="text-white/40 text-sm font-sans text-center mb-4"
+              transition={{ delay: 0.8, duration: 0.8 }}
+              href={`https://wa.me/6285134394748?text=${encodeURIComponent(
+                status === 'suka' 
+                  ? 'Hai! Makasih ya buat bunganya, cantik banget.. dan soal pesan kamu, aku juga ngerasa hal yang sama kok.'
+                  : status === 'pikir'
+                  ? 'Hai.. makasih ya udah berani cerita ke aku. Pesan kamu bikin aku mikir dalem banget, nanti kita ngobrol lagi ya?'
+                  : 'Makasih ya udah jujur sama aku. Kamu orang baik, jangan sedih ya.'
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-8 py-4 rounded-full bg-green-500 hover:bg-green-600 text-white font-bold shadow-lg transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer"
             >
-              gerakkan kursor ke ladang bunga ✦
-            </motion.p>
+              Balas di WhatsApp 💬
+            </motion.a>
 
             {onRestart && (
               <motion.div

@@ -30,6 +30,15 @@ const results = {
 export default function ResponseResult({ response, name, onRestart, onFlowerField }) {
   const result = results[response]
 
+  const onFlowerFieldClick = () => {
+    const statusMap = {
+      yes: 'suka',
+      unsure: 'pikir',
+      no: 'gagal'
+    };
+    onFlowerField(statusMap[response]);
+  };
+
   if (!result) return null
 
   return (
@@ -88,7 +97,7 @@ export default function ResponseResult({ response, name, onRestart, onFlowerFiel
           className="flex flex-col items-center gap-3"
         >
           <button
-            onClick={onFlowerField}
+            onClick={onFlowerFieldClick}
             className="px-10 py-4 md:px-12 md:py-5 rounded-full bg-gradient-to-r from-rose to-lavender text-white font-semibold text-lg md:text-xl shadow-lg shadow-rose/30 hover:shadow-xl hover:shadow-rose/40 transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer"
           >
             Lanjut ke Ladang Bunga 🌸

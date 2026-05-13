@@ -35,7 +35,7 @@ export default function LandingPage({ onStart }) {
           </svg>
         </motion.div>
 
-        <div className="text-white/90 text-xl md:text-2xl lg:text-3xl font-sans font-light leading-relaxed min-h-[4rem]">
+        <div className="text-white/90 text-xl md:text-3xl lg:text-4xl font-sans font-medium leading-relaxed min-h-[4rem] max-w-2xl mx-auto">
           <TypingText
             text="Ada sesuatu yang pengen aku bilang…"
             speed={45}
@@ -49,11 +49,11 @@ export default function LandingPage({ onStart }) {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, ease: 'easeOut' }}
-              className="mt-10"
+              className="mt-12"
             >
               <button
                 onClick={onStart}
-                className="group px-10 py-4 md:px-12 md:py-5 rounded-full bg-gradient-to-r from-rose to-lavender text-white font-semibold text-lg md:text-xl shadow-lg shadow-rose/30 hover:shadow-xl hover:shadow-rose/40 transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer overflow-hidden"
+                className="group px-12 py-5 md:px-16 md:py-6 rounded-full bg-gradient-to-r from-rose to-lavender text-white font-bold text-lg md:text-2xl shadow-xl shadow-rose/20 hover:shadow-2xl hover:shadow-rose/40 transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer overflow-hidden"
               >
                 <span className="relative z-10">Mulai</span>
                 <div className="absolute inset-0 bg-gradient-to-r from-rose-deep to-lavender-deep opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-full" />
@@ -67,9 +67,9 @@ export default function LandingPage({ onStart }) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 3, duration: 1 }}
-        className="absolute bottom-8 text-white/30 text-sm font-sans tracking-wider"
+        className="absolute bottom-6 text-white/40 text-sm font-medium tracking-widest uppercase"
       >
-        scroll down ✦
+        ✦ klik mulai ✦
       </motion.p>
     </div>
   )
