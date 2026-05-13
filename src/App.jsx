@@ -103,10 +103,10 @@ export default function App() {
               </motion.div>
 
               <h2 className="text-white/90 text-2xl md:text-3xl font-serif mb-3">
-                Siapa nama dia?
+                Siapa nama kamu?
               </h2>
               <p className="text-white/40 text-base md:text-lg font-sans mb-10">
-                Biar pesannya lebih personal~
+                Biar pesannya lebih personal, wanjay personal ga tuh wkwkwk...
               </p>
 
               <form onSubmit={handleNameSubmit} className="space-y-4" noValidate>
