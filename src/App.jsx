@@ -65,7 +65,7 @@ export default function App() {
   }, [])
 
   return (
-    <div className="relative">
+    <div className="relative min-h-screen px-4 md:px-6">
       <MusicToggle ref={musicRef} />
 
       <AnimatePresence mode="wait">
@@ -95,7 +95,7 @@ export default function App() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="relative z-10 w-full max-w-md mx-auto text-center px-4"
+              className="relative z-10 w-full max-w-md mx-auto text-center px-6 md:px-4"
             >
               <motion.div
                 animate={{ scale: [1, 1.1, 1] }}
@@ -112,7 +112,7 @@ export default function App() {
                 Biar pesannya lebih personal, wanjay personal ga tuh wkwkwk...
               </p>
 
-              <form onSubmit={handleNameSubmit} className="space-y-4" noValidate>
+              <form onSubmit={handleNameSubmit} className="flex flex-col gap-8" noValidate>
                 <input
                   type="text"
                   placeholder="Tulis namanya..."

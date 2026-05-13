@@ -34,4 +34,11 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+  touch-action: manipulation;
+  height: 100%;
+}
+
+#root {
+  min-height: 100vh;
+  overflow: hidden;
 }
