@@ -8,19 +8,34 @@ import ResponseChoices from './components/ResponseChoices'
 import ResponseResult from './components/ResponseResult'
 import FlowerField from './components/FlowerField'
 import MusicToggle from './components/MusicToggle'
+import BackButton from './components/BackButton'
 import './App.css'
 
 export default function App() {
   const [step, setStep] = useState('landing')
+  const [stepHistory, setStepHistory] = useState([])
   const [name, setName] = useState('')
   const [nameError, setNameError] = useState('')
   const musicRef = useRef(null)
 
+  const goToStep = useCallback((newStep) => {
+    setStepHistory(prev => [...prev, step])
+    setStep(newStep)
+  }, [step])
+
+  const handleBack = useCallback(() => {
+    const prev = stepHistory[stepHistory.length - 1]
+    if (prev) {
+      setStepHistory(prev => prev.slice(0, -1))
+      setStep(prev)
+    }
+  }, [stepHistory])
+
   const handleStart = useCallback(() => {
     setNameError('')
     musicRef.current?.play()
-    setStep('input-name')
-  }, [])
+    goToStep('input-name')
+  }, [goToStep])
 
   const handleNameSubmit = useCallback((e) => {
     e.preventDefault()
@@ -33,40 +48,46 @@ export default function App() {
       return
     }
     setName(val)
-    setStep('confession-flow')
-  }, [])
+    goToStep('confession-flow')
+  }, [goToStep])
 
   const handleFlowComplete = useCallback(() => {
-    setStep('minigame')
-  }, [])
+    goToStep('minigame')
+  }, [goToStep])
 
   const handleGameComplete = useCallback(() => {
-    setStep('confession-message')
-  }, [])
+    goToStep('confession-message')
+  }, [goToStep])
 
   const handleMessageComplete = useCallback(() => {
-    setStep('response-choices')
-  }, [])
+    goToStep('response-choices')
+  }, [goToStep])
 
   const handleChoose = useCallback((response) => {
-    setStep(`result-${response}`)
-  }, [])
+    goToStep(`result-${response}`)
+  }, [goToStep])
 
   const [fieldStatus, setFieldStatus] = useState('suka')
 
   const handleFlowerField = useCallback((status) => {
     setFieldStatus(status)
-    setStep('flower-field')
-  }, [])
+    goToStep('flower-field')
+  }, [goToStep])
 
   const handleRestart = useCallback(() => {
     setName('')
+    setStepHistory([])
     setStep('landing')
   }, [])
+
+  const noBackSteps = ['landing', 'confession-message', 'flower-field', 'minigame']
+  const showBack = stepHistory.length > 0 && !noBackSteps.includes(step)
 
   return (
     <div className="relative min-h-screen px-4 md:px-6">
       <MusicToggle ref={musicRef} />
+
+      {showBack && <BackButton onClick={handleBack} />}
 
       <AnimatePresence mode="wait">
         {step === 'landing' && (
@@ -154,7 +175,7 @@ export default function App() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <ConfessionFlow onComplete={handleFlowComplete} />
+            <ConfessionFlow onComplete={handleFlowComplete} onBack={handleBack} />
           </motion.div>
         )}
 
@@ -166,7 +187,7 @@ export default function App() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <MiniGame onComplete={handleGameComplete} />
+            <MiniGame onComplete={handleGameComplete} onBack={handleBack} />
           </motion.div>
         )}
 

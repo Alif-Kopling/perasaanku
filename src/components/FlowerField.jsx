@@ -1,5 +1,6 @@
 import { useRef, useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
+import { getWaUrl } from '../constants'
 
 const COLORS = [
   { petal: '#f472b6', center: '#fde68a', stem: '#4ade80' },
@@ -26,6 +27,10 @@ export default function FlowerField({ onRestart, status = 'suka' }) {
     const ctx = canvas.getContext('2d')
     let running = true
     let flowers = []
+    let stars = []
+    let fireflies = []
+    let fallingPetals = []
+    let sparkles = []
 
     const size = { w: 0, h: 0 }
     let bgGradient = null
@@ -86,6 +91,44 @@ export default function FlowerField({ onRestart, status = 'suka' }) {
       }
 
       flowers.sort((a, b) => a.z - b.z)
+
+      const starCount = isGagal ? 30 : 80
+      stars = Array.from({ length: starCount }, () => ({
+        x: Math.random() * w,
+        y: Math.random() * h * 0.65,
+        size: 0.5 + Math.random() * 1.5,
+        twinkleSpeed: 0.5 + Math.random() * 2,
+        twinklePhase: Math.random() * Math.PI * 2,
+      }))
+
+      const fireflyCount = isGagal ? 0 : 15
+      fireflies = Array.from({ length: fireflyCount }, () => ({
+        x: Math.random() * w,
+        y: h * 0.15 + Math.random() * h * 0.5,
+        size: 1.5 + Math.random() * 2.5,
+        speed: 0.2 + Math.random() * 0.3,
+        phaseX: Math.random() * Math.PI * 2,
+        phaseY: Math.random() * Math.PI * 2,
+        glowPhase: Math.random() * Math.PI * 2,
+        glowSpeed: 0.5 + Math.random() * 1.5,
+      }))
+
+      const petalCount = isGagal ? 0 : 10
+      fallingPetals = Array.from({ length: petalCount }, () => ({
+        x: Math.random() * (w + 100) - 50,
+        y: Math.random() * -h * 0.5,
+        size: 5 + Math.random() * 6,
+        speed: 15 + Math.random() * 25,
+        swayAmp: 20 + Math.random() * 30,
+        swaySpeed: 0.3 + Math.random() * 0.7,
+        phase: Math.random() * Math.PI * 2,
+        rotation: Math.random() * Math.PI * 2,
+        rotSpeed: 0.005 + Math.random() * 0.015,
+        color: COLORS[Math.floor(Math.random() * COLORS.length)].petal,
+        alpha: 0.3 + Math.random() * 0.4,
+      }))
+
+      sparkles = []
     }
 
     init()
@@ -122,6 +165,15 @@ export default function FlowerField({ onRestart, status = 'suka' }) {
       ctx.clearRect(0, 0, w, h)
       ctx.fillStyle = bgGradient
       ctx.fillRect(0, 0, w, h)
+
+      for (const star of stars) {
+        const twinkle = 0.2 + Math.sin(time * star.twinkleSpeed + star.twinklePhase) * 0.8
+        ctx.fillStyle = `rgba(255, 255, 255, ${Math.max(0, twinkle)})`
+        ctx.beginPath()
+        ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2)
+        ctx.fill()
+      }
+
       ctx.fillStyle = groundGradient
       ctx.fillRect(0, h - 80, w, 80)
 
@@ -232,6 +284,79 @@ export default function FlowerField({ onRestart, status = 'suka' }) {
         ctx.fill()
       }
 
+      for (const ff of fireflies) {
+        const glow = 0.3 + Math.sin(time * ff.glowSpeed + ff.glowPhase) * 0.7
+        const ffx = ff.x + Math.sin(time * ff.speed + ff.phaseX) * 40
+        const ffy = ff.y + Math.cos(time * ff.speed * 0.7 + ff.phaseY) * 25
+
+        const grad = ctx.createRadialGradient(ffx, ffy, 0, ffx, ffy, ff.size * 5)
+        grad.addColorStop(0, `rgba(255, 255, 210, ${glow * 0.5})`)
+        grad.addColorStop(1, 'rgba(255, 255, 210, 0)')
+        ctx.fillStyle = grad
+        ctx.beginPath()
+        ctx.arc(ffx, ffy, ff.size * 5, 0, Math.PI * 2)
+        ctx.fill()
+
+        ctx.fillStyle = `rgba(255, 255, 230, ${glow})`
+        ctx.beginPath()
+        ctx.arc(ffx, ffy, ff.size, 0, Math.PI * 2)
+        ctx.fill()
+      }
+
+      for (const p of fallingPetals) {
+        p.x += Math.sin(time * p.swaySpeed + p.phase) * 0.6
+        p.y += p.speed * 0.008
+        p.rotation += p.rotSpeed
+        if (p.y > h + 20) {
+          p.y = -20
+          p.x = Math.random() * (w + 100) - 50
+        }
+
+        ctx.save()
+        ctx.translate(p.x, p.y)
+        ctx.rotate(p.rotation)
+        ctx.globalAlpha = p.alpha
+        ctx.fillStyle = p.color
+        ctx.beginPath()
+        ctx.ellipse(0, 0, p.size * 0.35, p.size * 0.7, 0, 0, Math.PI * 2)
+        ctx.fill()
+        ctx.restore()
+      }
+
+      if (status === 'suka') {
+        if (Math.random() < 0.3) {
+          const angle = Math.random() * Math.PI * 2
+          const dist = heartSize * 0.2 + Math.random() * heartSize * 0.5
+          sparkles.push({
+            x: heartX + Math.cos(angle) * dist,
+            y: heartY - Math.sin(angle) * dist * 0.6,
+            vx: (Math.random() - 0.5) * 0.4,
+            vy: -0.3 - Math.random() * 1,
+            life: 1,
+            size: 1.5 + Math.random() * 2.5,
+            color: ['#fbcfe8', '#f472b6', '#fde68a', '#ffffff'][Math.floor(Math.random() * 4)],
+          })
+        }
+
+        for (let i = sparkles.length - 1; i >= 0; i--) {
+          const s = sparkles[i]
+          s.x += s.vx
+          s.y += s.vy
+          s.vy += 0.01
+          s.life -= 0.008
+          if (s.life <= 0) {
+            sparkles.splice(i, 1)
+            continue
+          }
+          ctx.globalAlpha = s.life
+          ctx.fillStyle = s.color
+          ctx.beginPath()
+          ctx.arc(s.x, s.y, s.size * s.life, 0, Math.PI * 2)
+          ctx.fill()
+        }
+        ctx.globalAlpha = 1
+      }
+
       animFrameRef.current = requestAnimationFrame(loop)
     }
 
@@ -273,17 +398,42 @@ export default function FlowerField({ onRestart, status = 'suka' }) {
               </motion.p>
             )}
 
+            {status === 'suka' && (
+              <motion.p
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2, duration: 0.8 }}
+                className="text-rose-soft/80 text-lg md:text-xl font-serif text-center mb-2"
+              >
+                Untuk kamu, ladang bunga ini… 💕
+              </motion.p>
+            )}
+            {status === 'pikir' && (
+              <motion.p
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2, duration: 0.8 }}
+                className="text-lavender/80 text-lg md:text-xl font-serif text-center mb-2"
+              >
+                Semoga suatu hari nanti… 🌷
+              </motion.p>
+            )}
+            {status === 'gagal' && (
+              <motion.p
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2, duration: 0.8 }}
+                className="text-white/50 text-lg md:text-xl font-serif text-center mb-2"
+              >
+                Terima kasih untuk semuanya… 🌻
+              </motion.p>
+            )}
+
             <motion.a
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8, duration: 0.8 }}
-              href={`https://wa.me/6285134394748?text=${encodeURIComponent(
-                status === 'suka' 
-                  ? 'Hai! Makasih ya buat bunganya, cantik banget.. dan soal pesan kamu, aku juga ngerasa hal yang sama kok.'
-                  : status === 'pikir'
-                  ? 'Hai.. makasih ya udah berani cerita ke aku. Pesan kamu bikin aku mikir dalem banget, nanti kita ngobrol lagi ya?'
-                  : 'Makasih ya udah jujur sama aku. Kamu orang baik, jangan sedih ya.'
-              )}`}
+              href={getWaUrl(status)}
               target="_blank"
               rel="noopener noreferrer"
               className="px-8 py-4 rounded-full bg-green-500 hover:bg-green-600 text-white font-bold shadow-lg transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer"

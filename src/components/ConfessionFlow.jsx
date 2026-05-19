@@ -29,7 +29,7 @@ const steps = [
   },
 ]
 
-export default function ConfessionFlow({ onComplete }) {
+export default function ConfessionFlow({ onComplete, onBack }) {
   const [currentStep, setCurrentStep] = useState(0)
   const [direction, setDirection] = useState(1)
 
@@ -42,6 +42,15 @@ export default function ConfessionFlow({ onComplete }) {
     }
   }, [currentStep, onComplete])
 
+  const prev = useCallback(() => {
+    if (currentStep > 0) {
+      setDirection(-1)
+      setCurrentStep(s => s - 1)
+    } else {
+      onBack?.()
+    }
+  }, [currentStep, onBack])
+
   const step = steps[currentStep]
   const isLast = currentStep === steps.length - 1
 
@@ -51,7 +60,15 @@ export default function ConfessionFlow({ onComplete }) {
 
       <div className="relative z-10 w-full max-w-xl mx-auto text-center px-4">
         <div className="mb-10">
-          <div className="flex justify-center gap-2 mb-10">
+          <div className="flex items-center justify-between mb-10">
+            <button
+              onClick={prev}
+              className="text-white/40 hover:text-white/70 transition-colors duration-300 text-2xl cursor-pointer"
+              aria-label="Kembali"
+            >
+              ←
+            </button>
+            <div className="flex justify-center gap-2 flex-1">
             {steps.map((_, i) => (
               <div
                 key={i}
@@ -64,6 +81,7 @@ export default function ConfessionFlow({ onComplete }) {
                 }`}
               />
             ))}
+          </div>
           </div>
         </div>
 

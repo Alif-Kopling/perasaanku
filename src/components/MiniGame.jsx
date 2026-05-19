@@ -14,7 +14,7 @@ function createHeart() {
   }
 }
 
-export default function MiniGame({ onComplete }) {
+export default function MiniGame({ onComplete, onBack }) {
   const [hearts, setHearts] = useState([])
   const [score, setScore] = useState(0)
   const [timeLeft, setTimeLeft] = useState(GAME_DURATION)
@@ -92,12 +92,22 @@ export default function MiniGame({ onComplete }) {
             >
               Mulai Game
             </button>
-            <button
-              onClick={onComplete}
-              className="text-white/40 text-sm md:text-base font-sans hover:text-white/60 transition-colors duration-300 cursor-pointer underline underline-offset-2"
-            >
-              Skip →
-            </button>
+            <div className="flex items-center gap-4">
+              {onBack && (
+                <button
+                  onClick={onBack}
+                  className="text-white/40 text-sm md:text-base font-sans hover:text-white/60 transition-colors duration-300 cursor-pointer underline underline-offset-2"
+                >
+                  ← Kembali
+                </button>
+              )}
+              <button
+                onClick={onComplete}
+                className="text-white/40 text-sm md:text-base font-sans hover:text-white/60 transition-colors duration-300 cursor-pointer underline underline-offset-2"
+              >
+                Skip →
+              </button>
+            </div>
           </div>
         </motion.div>
       )}
