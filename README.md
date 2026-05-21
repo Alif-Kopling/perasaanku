@@ -1,5 +1,8 @@
 
-nguawor banget cik bikin doang di kasihin ke dia kagak
+ga jadi cik saya mundur aja, jadi artefak github aja
+
+---
+nguawor banget cik bikin doang di kasihin ke dia kaga
 ---
 <p>mw gmana lagi bg, tkut soalnya...</p>
 
